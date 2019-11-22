@@ -1,11 +1,13 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "juce_ReadWriteLock.h"
 #include "fixed_ReadWriteLock.h"
+#include "fixed2_ReadWriteLock.h"
 
 using namespace juce;
 
 JUCEReadWriteLock buggyLock;
 FixedReadWriteLock healthyLock;
+FixedReadWriteLock2 healthyLock2;
 
 std::atomic<int> numDuringRead;
 std::atomic<int> numDuringWrite;
@@ -70,29 +72,64 @@ public:
   }
 };
 
+class TestHealthyReadThread2 : public Thread {
+public:
+  TestHealthyReadThread2() : Thread("TestHealthyReadThread2") {}
+
+  void run() override {
+    healthyLock2.enterRead();
+    numDuringRead ++;
+    
+    jassert(numDuringWrite == 0);
+
+    numDuringRead --;
+    healthyLock2.exitRead();
+  }
+};
+
+class TestHealthyWriteThread2 : public Thread {
+public:
+  TestHealthyWriteThread2() : Thread("TestHealthyWriteThread2") {}
+
+  void run() override {
+    healthyLock2.enterWrite();
+    numDuringWrite ++;
+    
+    jassert(numDuringRead == 0 && numDuringWrite == 1);
+
+    numDuringWrite --;
+    healthyLock2.exitWrite();
+  }
+};
+
 int main(int argc, char* argv[]) {
   if(argc != 4) {
-    std::cout << "Usage: RWLockTest num-contenders num-trials buggy-or-healthy"
+    std::cout << "Usage: RWLockTest num-contenders num-trials rwlock-version"
               << std::endl;
     std::cout << "num-contenders: number of contending reader/writers." << std::endl;
     std::cout << "num-trials: number of runs for the stress test." << std::endl;
-    std::cout << "buggy-or-healthy: if \"buggy\", use JUCE ReadWriteLock;" << std::endl
-              << "                  otherwise, use the bug-fixed version." << std::endl;
+    std::cout << "rwlock-version: \"buggy\": use JUCE ReadWriteLock;" << std::endl
+              << "                \"fixed\": use the first bug-fixed version." << std::endl
+              << "                \"fixed2\": use the second bug-fixed version." << std::endl;
     return 1;
   }
   
   int numContenders = std::atoi(argv[1]);
   int numTrials = std::atoi(argv[2]);
-  bool useBuggyRWLock = ! std::strcmp("buggy", argv[3]);
   
   OwnedArray<Thread> testThreads;
   for(int i = 0; i < numContenders; i ++) {
-    if(useBuggyRWLock) {
+    if(! std::strcmp("buggy", argv[3])) {
       testThreads.add(new TestBuggyReadThread());
       testThreads.add(new TestBuggyWriteThread());
-    } else {
+    } else
+    if(! std::strcmp("fixed", argv[3])) {
       testThreads.add(new TestHealthyReadThread());
       testThreads.add(new TestHealthyWriteThread());
+    } else
+    if(! std::strcmp("fixed2", argv[3])) {
+      testThreads.add(new TestHealthyReadThread2());
+      testThreads.add(new TestHealthyWriteThread2());
     }
   }
   

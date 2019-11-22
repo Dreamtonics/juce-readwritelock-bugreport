@@ -2,7 +2,8 @@
 
 typedef rwlock {
   critical_section access_lock;
-  waitable_event wait_event;
+  waitable_event wait_event_r;
+  waitable_event wait_event_w;
   byte num_waiting_writers;
   byte num_writers;
   byte num_readers;
@@ -19,7 +20,7 @@ inline enter_read(rwl) {
      break;
   :: else
   -> exit_critical_section(rwl.access_lock);
-     wait(rwl.wait_event);
+     wait(rwl.wait_event_r);
      enter_critical_section(rwl.access_lock);
   od;
   
@@ -31,7 +32,8 @@ inline exit_read(rwl) {
   rwl.num_readers --;
   if
   :: rwl.num_readers == 0
-  -> signal(rwl.wait_event);
+  -> signal(rwl.wait_event_r);
+     signal(rwl.wait_event_w);
   :: else -> skip;
   fi;
   exit_critical_section(rwl.access_lock);
@@ -49,7 +51,7 @@ inline enter_write(rwl) {
   :: else
   -> rwl.num_waiting_writers ++;
      exit_critical_section(rwl.access_lock);
-     wait(rwl.wait_event);
+     wait(rwl.wait_event_w);
      enter_critical_section(rwl.access_lock);
      rwl.num_waiting_writers --;
   od;
@@ -62,7 +64,8 @@ inline exit_write(rwl) {
   rwl.num_writers --;
   if
   :: rwl.num_writers == 0
-  -> signal(rwl.wait_event);
+  -> signal(rwl.wait_event_r);
+     signal(rwl.wait_event_w);
   :: else -> skip;
   fi;
   exit_critical_section(rwl.access_lock);

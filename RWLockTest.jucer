@@ -7,6 +7,10 @@
             file="Source/fixed_ReadWriteLock.cpp"/>
       <FILE id="k5cMZn" name="fixed_ReadWriteLock.h" compile="0" resource="0"
             file="Source/fixed_ReadWriteLock.h"/>
+      <FILE id="uWofGw" name="fixed2_ReadWriteLock.cpp" compile="1" resource="0"
+            file="Source/fixed2_ReadWriteLock.cpp"/>
+      <FILE id="mVjf9t" name="fixed2_ReadWriteLock.h" compile="0" resource="0"
+            file="Source/fixed2_ReadWriteLock.h"/>
       <FILE id="k0Pd7F" name="juce_ReadWriteLock.cpp" compile="1" resource="0"
             file="Source/juce_ReadWriteLock.cpp"/>
       <FILE id="cEM0D7" name="juce_ReadWriteLock.h" compile="0" resource="0"

@@ -13,16 +13,18 @@ inline exit_critical_section(cs) {
   cs.set = false;
 }
 
-bit proc_wake_flag;
+typedef waitable_event {
+  bit wake_flag;
+}
 
-inline wait() {
+inline wait(e) {
   printf("Waiting (pid = %d)\n", _pid);
   atomic {
-    (proc_wake_flag)
-    -> proc_wake_flag = false;
+    (e.wake_flag)
+    -> e.wake_flag = false;
   }
 }
 
-inline signal() {
-  proc_wake_flag = true;
+inline signal(e) {
+  e.wake_flag = true;
 }
