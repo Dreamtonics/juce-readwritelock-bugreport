@@ -12,6 +12,8 @@ FixedReadWriteLock2 healthyLock2;
 std::atomic<int> numDuringRead;
 std::atomic<int> numDuringWrite;
 
+bool withDummyWorkload{true};
+
 class TestBuggyReadThread : public Thread {
 public:
   TestBuggyReadThread() : Thread("TestBuggyReadThread") {}
@@ -21,6 +23,7 @@ public:
     numDuringRead ++;
     
     jassert(numDuringWrite == 0);
+    if(withDummyWorkload) Thread::sleep(5);
 
     numDuringRead --;
     buggyLock.exitRead();
@@ -36,6 +39,7 @@ public:
     numDuringWrite ++;
     
     jassert(numDuringRead == 0 && numDuringWrite == 1);
+    if(withDummyWorkload) Thread::sleep(5);
 
     numDuringWrite --;
     buggyLock.exitWrite();
@@ -51,6 +55,7 @@ public:
     numDuringRead ++;
     
     jassert(numDuringWrite == 0);
+    if(withDummyWorkload) Thread::sleep(5);
 
     numDuringRead --;
     healthyLock.exitRead();
@@ -66,6 +71,7 @@ public:
     numDuringWrite ++;
     
     jassert(numDuringRead == 0 && numDuringWrite == 1);
+    if(withDummyWorkload) Thread::sleep(5);
 
     numDuringWrite --;
     healthyLock.exitWrite();
@@ -81,6 +87,7 @@ public:
     numDuringRead ++;
     
     jassert(numDuringWrite == 0);
+    if(withDummyWorkload) Thread::sleep(5);
 
     numDuringRead --;
     healthyLock2.exitRead();
@@ -96,6 +103,7 @@ public:
     numDuringWrite ++;
     
     jassert(numDuringRead == 0 && numDuringWrite == 1);
+    if(withDummyWorkload) Thread::sleep(5);
 
     numDuringWrite --;
     healthyLock2.exitWrite();
@@ -143,8 +151,7 @@ int main(int argc, char* argv[]) {
       for(auto* t : testThreads)
         t -> waitForThreadToExit(-1);
     }
-    if(i % 10 == 0)
-      DBG(i);
+    DBG(i << "\telapsed time = " << tSec * 1000.0 << " ms.");
   }
   
   return 0;
