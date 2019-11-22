@@ -28,7 +28,11 @@ inline enter_read(rwl) {
 inline exit_read(rwl) {
   enter_critical_section(rwl.access_lock);
   rwl.num_readers --;
-  signal();
+  if
+  :: rwl.num_readers == 0
+  -> signal();
+  :: else -> skip;
+  fi;
   exit_critical_section(rwl.access_lock);
   printf("Read exited.\n");
 }
@@ -55,7 +59,11 @@ inline enter_write(rwl) {
 inline exit_write(rwl) {
   enter_critical_section(rwl.access_lock);
   rwl.num_writers --;
-  signal();
+  if
+  :: rwl.num_writers == 0
+  -> signal();
+  :: else -> skip;
+  fi;
   exit_critical_section(rwl.access_lock);
   printf("Write exited.\n");
 }
