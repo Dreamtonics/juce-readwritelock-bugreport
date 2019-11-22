@@ -56,6 +56,46 @@ JUCE v5.4.5
 99	elapsed time = 16.789 ms.
 ```
 
+You can also change line 8 of `Source/Main.cpp` to `juce::ReadWriteLock buggyLock;`. This is the original JUCE version with 100 ms (instead of forever) timeout. A large random overhead is seen on JUCE 5.4.5's `ReadWriteLock`.
+```sh
+$ .RWLockTest 5 10 buggy
+JUCE v5.4.5
+0	elapsed time = 427.42 ms.
+1	elapsed time = 423.053 ms.
+2	elapsed time = 517.401 ms.
+3	elapsed time = 131.46 ms.
+4	elapsed time = 427.903 ms.
+5	elapsed time = 317.037 ms.
+6	elapsed time = 220.914 ms.
+7	elapsed time = 227.309 ms.
+8	elapsed time = 231.661 ms.
+9	elapsed time = 527.06 ms.
+$ .RWLockTest 5 10 fixed
+JUCE v5.4.5
+0	elapsed time = 31.512 ms.
+1	elapsed time = 31.461 ms.
+2	elapsed time = 31.46 ms.
+3	elapsed time = 31.378 ms.
+4	elapsed time = 30.995 ms.
+5	elapsed time = 33.04 ms.
+6	elapsed time = 30.998 ms.
+7	elapsed time = 51.561 ms.
+8	elapsed time = 31.289 ms.
+9	elapsed time = 31.398 ms.
+$ .RWLockTest 5 10 fixed2
+JUCE v5.4.5
+0	elapsed time = 46.269 ms.
+1	elapsed time = 48.219 ms.
+2	elapsed time = 48.208 ms.
+3	elapsed time = 52.227 ms.
+4	elapsed time = 52.319 ms.
+5	elapsed time = 52.242 ms.
+6	elapsed time = 52.265 ms.
+7	elapsed time = 52.216 ms.
+8	elapsed time = 52.101 ms.
+9	elapsed time = 52.167 ms.
+```
+
 Verifying ReadWriteLock using SPIN
 ---
 
